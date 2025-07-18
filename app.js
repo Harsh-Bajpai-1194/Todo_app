@@ -1,23 +1,62 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('todo-input');
-  const addBtn = document.getElementById('add-btn');
-  const todoList = document.getElementById('todo-list');
+    const input = document.getElementById('todo-input');
+    const addBtn = document.getElementById('add-btn');
+    const todoList = document.getElementById('todo-list');
 
-  addBtn.addEventListener('click', () => {
-    const task = input.value.trim();
-    if (task === '') return;
+    // Load todos from localStorage
+    let todos = JSON.parse(localStorage.getItem('todos')) || [];
 
-    const li = document.createElement('li');
-    li.textContent = task;
+    // Render existing todos
+    todos.forEach(todo => renderTodo(todo));
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.addEventListener('click', () => {
-      li.remove();
+    addBtn.addEventListener('click', addTodo);
+
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTodo();
     });
 
-    li.appendChild(deleteBtn);
-    todoList.appendChild(li);
-    input.value = '';
-  });
+    function addTodo() {
+        const text = input.value.trim();
+        if (text === '') return;
+        const todo = { text, completed: false };
+        todos.push(todo);
+        saveTodos();
+        renderTodo(todo);
+        input.value = '';
+    }
+
+    function renderTodo(todo) {
+        const li = document.createElement('li');
+        li.textContent = todo.text;
+        if (todo.completed) {
+            li.classList.add('completed');
+        }
+
+        // Complete button
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = '✔️';
+        completeBtn.style.marginRight = '8px';
+        completeBtn.onclick = () => {
+            todo.completed = !todo.completed;
+            saveTodos();
+            li.classList.toggle('completed');
+        };
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '🗑️';
+        deleteBtn.onclick = () => {
+            todos = todos.filter(t => t !== todo);
+            saveTodos();
+            li.remove();
+        };
+
+        li.prepend(completeBtn);
+        li.appendChild(deleteBtn);
+        todoList.appendChild(li);
+    }
+
+    function saveTodos() {
+        localStorage.setItem('todos', JSON.stringify(todos));
+    }
 });
