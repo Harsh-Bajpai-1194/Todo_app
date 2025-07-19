@@ -12,25 +12,25 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-#todo-input1,
-#todo-input2 {
+input {
   width: 70%;
   padding: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-}
-
-#add-btn1,
-#add-btn2 {
-  padding: 10px;
-  margin-bottom: 10px;
+  margin: 5px 0;
+  display: inline-block;
 }
 
 button {
+  padding: 10px;
+  margin: 5px 0;
   cursor: pointer;
 }
 
 ul {
   list-style: none;
   padding: 0;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: gray;
 }
