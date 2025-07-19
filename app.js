@@ -23,14 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function addTodo() {
-        const text = input.value.trim();
-        if (text === '') return;
-        const todo = { text, completed: false };
-        todos.push(todo);
-        saveTodos();
-        renderTodo(todo);
-        input1.value = '';
-        input2.value = '';
+    const task = input1.value.trim();
+    const time = input2.value.trim();
+    if (task === '' && time === '') return;
+
+    const text = time ? `${task} at ${time}` : task;
+    const todo = { text, completed: false };
+    todos.push(todo);
+    saveTodos();
+    renderTodo(todo);
+    input1.value = '';
+    input2.value = '';
     }
 
     function renderTodo(todo) {
