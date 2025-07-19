@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('todo-input');
-    const addBtn = document.getElementById('add-btn');
+    const input1 = document.getElementById('todo-input1');
+    const input2 = document.getElementById('todo-input2');
+    const addBtn1 = document.getElementById('add-btn1');
+    const addBtn2 = document.getElementById('add-btn2');
     const todoList = document.getElementById('todo-list');
 
     // Load todos from localStorage
