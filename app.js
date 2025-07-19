@@ -11,9 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render existing todos
     todos.forEach(todo => renderTodo(todo));
 
-    addBtn.addEventListener('click', addTodo);
+    addBtn1.addEventListener('click', addTodo);
+    addBtn2.addEventListener('click', addTodo);
 
-    input.addEventListener('keypress', (e) => {
+    input1.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTodo();
+    });
+
+    input2.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addTodo();
     });
 
@@ -24,7 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
         todos.push(todo);
         saveTodos();
         renderTodo(todo);
-        input.value = '';
+        input1.value = '';
+        input2.value = '';
     }
 
     function renderTodo(todo) {
