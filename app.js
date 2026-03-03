@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const addBtn2 = document.getElementById('add-btn2');
     const todoList = document.getElementById('todo-list');
 
-    // Load todos from localStorage
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
 
     // Render existing todos
