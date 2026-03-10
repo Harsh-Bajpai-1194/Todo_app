@@ -2,13 +2,15 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    // Replace this with your MongoDB connection string if it's different.
-    const db = process.env.MONGO_URI || 'mongodb://localhost:27017/todoapp';
-    await mongoose.connect(db);
+    const db = process.env.MONGO_URI;
+    if (!db) {
+      throw new Error('MONGO_URI is not defined in .env file');
+    }
+    const conn = await mongoose.connect(db);
 
-    console.log('MongoDB Connected...');
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (err) {
-    console.error(err.message);
+    console.error(`Error: ${err.message}`);
     // Exit process with failure
     process.exit(1);
   }

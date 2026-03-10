@@ -13,6 +13,7 @@ const authReducer = (state, action) => {
       return { ...state, ...action.payload, isAuthenticated: true, loading: false };
     case 'AUTH_ERROR':
     case 'LOGIN_FAIL':
+    case 'REGISTER_FAIL':
     case 'LOGOUT':
       localStorage.removeItem('token');
       return { ...state, token: null, isAuthenticated: false, loading: false, user: null };
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       loadUser();
     } catch (err) {
       console.error(err.response.data.msg);
-      dispatch({ type: 'LOGIN_FAIL', payload: err.response.data.msg }); // Or a new REGISTER_FAIL
+      dispatch({ type: 'REGISTER_FAIL', payload: err.response.data.msg });
     }
   };
 
