@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { middleware: auth } = require('./auth');
+const { middleware } = require('./auth');
 const Todo = require('./Todo');
 
 // @route    GET api/todos
 // @desc     Get all user's todos
 // @access   Private
-router.get('/', auth, async (req, res) => {
+router.get('/', middleware, async (req, res) => {
     try {
         // Find todos by the user id from the auth middleware and sort by the most recent
         const todos = await Todo.find({ user: req.user.id }).sort({ date: -1 });
@@ -20,7 +20,7 @@ router.get('/', auth, async (req, res) => {
 // @route    POST api/todos
 // @desc     Add new todo
 // @access   Private
-router.post('/', auth, async (req, res) => {
+router.post('/', middleware, async (req, res) => {
     const { task, time, completed } = req.body;
 
     try {
@@ -42,7 +42,7 @@ router.post('/', auth, async (req, res) => {
 // @route    PUT api/todos/:id
 // @desc     Update todo
 // @access   Private
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', middleware, async (req, res) => {
     const { task, time, completed } = req.body;
 
     // Build todo object
@@ -73,7 +73,7 @@ router.put('/:id', auth, async (req, res) => {
 // @route    DELETE api/todos/:id
 // @desc     Delete todo
 // @access   Private
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', middleware, async (req, res) => {
     try {
         let todo = await Todo.findById(req.params.id);
 

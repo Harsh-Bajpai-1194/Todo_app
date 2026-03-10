@@ -3,9 +3,7 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   try {
     // Replace this with your MongoDB connection string if it's different.
-    // For example, if you are using MongoDB Atlas, the string will look different.
-    const db = 'mongodb://localhost:27017/todoapp';
-
+    const db = process.env.MONGO_URI || 'mongodb://localhost:27017/todoapp';
     await mongoose.connect(db);
 
     console.log('MongoDB Connected...');

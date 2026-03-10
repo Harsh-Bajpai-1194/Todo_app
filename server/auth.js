@@ -3,7 +3,6 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('./User');
-require('dotenv').config();
 
 // Middleware to verify token
 const middleware = function (req, res, next) {

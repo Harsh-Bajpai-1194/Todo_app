@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-    "scripts": {
+  "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-
   "keywords": [],
   "author": "",
   "license": "ISC",
