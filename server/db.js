@@ -1,12 +1,15 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB Atlas Connected...');
+    const db = process.env.MONGO_URI;
+    if (!db) {
+      throw new Error('MONGO_URI is not defined in .env file');
+    }
+    const conn = await mongoose.connect(db);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (err) {
-    console.error(err.message);
+    console.error(`Error: ${err.message}`);
     // Exit process with failure
     process.exit(1);
   }

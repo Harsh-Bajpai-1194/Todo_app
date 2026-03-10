@@ -58,7 +58,7 @@ router.post('/', async (req, res) => {
 
         const payload = { user: { id: user.id } };
 
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: 360000 }, (err, token) => {
+        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN }, (err, token) => {
             if (err) throw err;
             res.json({ token });
         });

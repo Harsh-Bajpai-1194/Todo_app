@@ -11,7 +11,10 @@ This is a full-stack Todo application featuring a Node.js backend with Express a
   - `users.js`: User registration routes.
   - `todos.js`: Todo CRUD routes.
   - `User.js`, `Todo.js`: Mongoose data models.
-- **app.js**: Frontend logic.
+- **client/**: Contains the frontend React application.
+  - `src/main.jsx`: Client entry point.
+  - `src/App.jsx`: Root React component.
+  - `src/context/AuthContext.jsx`: Global state management for authentication.
 
 ## Setup Instructions
 
@@ -52,7 +55,7 @@ A professional project requires a robust backend instead of relying solely on lo
 - **Authentication & Authorization**: Implement secure user login and signup using JSON Web Tokens (JWT) and bcrypt for password hashing. This ensures users can only access their own tasks.
 - **Database Integration (MongoDB)**: Use Mongoose to define a Task schema that includes fields for the task description, time, completion status, and a reference to the User ID.
 
-### Phase 2: Frontend Evolution (React) 🚧
+### Phase 2: Frontend Evolution (React) 🏗️
 Replace the current `index.html` and `app.js` with a component-based React architecture.
 - **State Management**: Use Redux Toolkit or the React Context API to manage the global state of tasks and user authentication status.
 - **Modern UI/UX**: Upgrade `style.css` by using a framework like Tailwind CSS or Material UI.
