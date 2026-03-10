@@ -1,6 +1,8 @@
 import React from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { TodoProvider } from './context/TodoContext';
+import TodoForm from './components/TodoForm';
+import TodoList from './components/TodoList';
 // We will create components for Login, Register, and Todos later
 // For now, this structure sets up the context and basic layout.
 
@@ -14,7 +16,10 @@ const App = () => {
             <h1 className="text-xl font-bold">Todo App</h1>
           </header>
           <main className="p-4">
-            <p>Welcome to the React Frontend! (Phase 2)</p>
+            <div className="container mx-auto max-w-2xl">
+              <TodoForm />
+              <TodoList />
+            </div>
           </main>
         </div>
       </TodoProvider>
