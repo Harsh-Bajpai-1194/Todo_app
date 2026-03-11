@@ -1,20 +1,32 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useMemo } from "react";
 import axios from 'axios';
-// Assuming AuthContext provides the auth token
-// import { AuthContext } from './AuthContext'; 
 
 export const TodoContext = createContext();
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export const TodoProvider = ({ children }) => {
   const [todos, setTodos] = useState([]);
-  // const { token } = useContext(AuthContext); // Example of getting token
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'completed', 'pending'
 
-  // In a full-stack integration, this would fetch from your API.
+  // Memoize the derived state to prevent re-computation on every render
+  const filteredTodos = useMemo(() => {
+    return todos
+      .filter(todo => {
+        if (filterStatus === 'completed') return todo.completed;
+        if (filterStatus === 'pending') return !todo.completed;
+        return true; // 'all'
+      })
+      .filter(todo => 
+        todo.task.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [todos, searchTerm, filterStatus]);
+
   const getTodos = async () => {
     try {
-      // const res = await axios.get('/api/todos', { headers: { 'x-auth-token': token } });
-      // setTodos(res.data);
-      console.log("Fetching todos from API...");
+      const res = await axios.get(`${API_BASE_URL}/api/todos`);
+      setTodos(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -22,11 +34,8 @@ export const TodoProvider = ({ children }) => {
 
   const addTodo = async (todo) => {
     try {
-      // const res = await axios.post('/api/todos', todo, { headers: { 'x-auth-token': token } });
-      // setTodos((prev) => [res.data, ...prev]);
-      console.log("Adding todo via API...");
-      // For now, simulate with local state
-      setTodos((prev) => [{ id: Date.now(), ...todo }, ...prev]);
+      const res = await axios.post(`${API_BASE_URL}/api/todos`, todo);
+      setTodos((prev) => [res.data, ...prev]);
     } catch (err) {
       console.error(err);
     }
@@ -34,8 +43,8 @@ export const TodoProvider = ({ children }) => {
 
   const deleteTodo = async (id) => {
     try {
-      // await axios.delete(`/api/todos/${id}`, { headers: { 'x-auth-token': token } });
-      setTodos((prev) => prev.filter((todo) => todo.id !== id));
+      await axios.delete(`${API_BASE_URL}/api/todos/${id}`);
+      setTodos((prev) => prev.filter((todo) => todo._id !== id));
     } catch (err) {
       console.error(err);
     }
@@ -43,19 +52,21 @@ export const TodoProvider = ({ children }) => {
 
   const updateTodo = async (id, updatedFields) => {
     try {
-      // const res = await axios.put(`/api/todos/${id}`, updatedFields, { headers: { 'x-auth-token': token } });
-      setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, ...updatedFields } : todo)));
+      const res = await axios.put(`${API_BASE_URL}/api/todos/${id}`, updatedFields);
+      // Note: MongoDB uses _id
+      setTodos((prev) => prev.map((todo) => (todo._id === id ? res.data : todo)));
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <TodoContext.Provider value={{ todos, addTodo, getTodos, deleteTodo, updateTodo }}>
+    <TodoContext.Provider value={{ 
+      todos, filteredTodos, 
+      addTodo, getTodos, deleteTodo, updateTodo,
+      setSearchTerm, setFilterStatus
+    }}>
       {children}
     </TodoContext.Provider>
   );
 };
-
-// This allows 'import TodoContext' in other files
-export default TodoContext;

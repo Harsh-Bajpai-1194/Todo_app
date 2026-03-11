@@ -1,46 +1,32 @@
 import React, { useContext } from 'react';
-import TodoContext from '../context/TodoContext';
+import { TodoContext } from '../context/TodoContext';
 
 const TodoItem = ({ todo }) => {
-  const todoContext = useContext(TodoContext);
-  const { deleteTodo, setCurrent, clearCurrent, updateTodo } = todoContext;
+  const { deleteTodo, updateTodo } = useContext(TodoContext);
 
-  const { _id, task, time, completed } = todo;
-
-  const onDelete = () => {
-    deleteTodo(_id);
-    clearCurrent();
-  };
-
-  const onToggle = () => {
-    updateTodo({ ...todo, completed: !completed });
+  const handleToggleComplete = () => {
+    updateTodo(todo._id, { completed: !todo.completed });
   };
 
   return (
-    <div className={`bg-white p-4 rounded shadow mb-3 flex justify-between items-center ${completed ? 'opacity-60' : ''}`}>
-      <div>
-        <h3 className={`text-lg font-semibold ${completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-          {task}
-        </h3>
-        {time && <span className="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{time}</span>}
+    <div className={`flex items-center justify-between p-4 mb-2 rounded-lg shadow-sm ${todo.completed ? 'bg-green-100 text-gray-500' : 'bg-white'}`}>
+      <div className="flex items-center gap-4 flex-1">
+        <input
+          type="checkbox"
+          checked={todo.completed}
+          onChange={handleToggleComplete}
+          className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+        />
+        <span className={`flex-1 ${todo.completed ? 'line-through' : ''}`}>
+          {todo.task}
+        </span>
       </div>
-      <div className="flex gap-2">
-        <button
-          className={`px-3 py-1 rounded text-sm text-white ${completed ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'}`}
-          onClick={onToggle}
-        >
-          {completed ? 'Undo' : 'Done'}
-        </button>
-        <button
-          className="bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-gray-800"
-          onClick={() => setCurrent(todo)}
-        >
-          Edit
-        </button>
-        <button className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600" onClick={onDelete}>
-          Delete
-        </button>
-      </div>
+      <button
+        onClick={() => deleteTodo(todo._id)}
+        className="text-red-500 hover:text-red-700 font-semibold px-3 py-1"
+      >
+        Delete
+      </button>
     </div>
   );
 };

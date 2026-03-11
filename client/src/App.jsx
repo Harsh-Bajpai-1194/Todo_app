@@ -1,27 +1,41 @@
 import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { TodoProvider } from './context/TodoContext';
+import Navbar from './components/Navbar';
 import TodoForm from './components/TodoForm';
 import TodoList from './components/TodoList';
-// We will create components for Login, Register, and Todos later
-// For now, this structure sets up the context and basic layout.
+import TodoFilter from './components/TodoFilter';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import PrivateRoute from './routing/PrivateRoute';
+
+const TodoHome = () => (
+  <>
+    <TodoForm />
+    <TodoFilter />
+    <TodoList />
+  </>
+);
 
 const App = () => {
-  console.log('App is rendering...');
   return (
     <AuthProvider>
       <TodoProvider>
-        <div className="min-h-screen bg-gray-100 text-gray-900 font-sans">
-          <header className="bg-blue-600 text-white p-4 shadow-md">
-            <h1 className="text-xl font-bold">Todo App</h1>
-          </header>
-          <main className="p-4">
-            <div className="container mx-auto max-w-2xl">
-              <TodoForm />
-              <TodoList />
-            </div>
-          </main>
-        </div>
+        <Router>
+          <div className="min-h-screen bg-gray-100 text-gray-900 font-sans">
+            <Navbar />
+            <main className="p-4">
+              <div className="container mx-auto max-w-2xl">
+                <Routes>
+                  <Route path="/" element={<PrivateRoute><TodoHome /></PrivateRoute>} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                </Routes>
+              </div>
+            </main>
+          </div>
+        </Router>
       </TodoProvider>
     </AuthProvider>
   );

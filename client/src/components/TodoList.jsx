@@ -1,39 +1,28 @@
 import React, { useContext, useEffect } from 'react';
 import { TodoContext } from '../context/TodoContext';
+import { AuthContext } from '../context/AuthContext';
+import TodoItem from './TodoItem';
 
 const TodoList = () => {
-  const { todos, getTodos, deleteTodo, updateTodo } = useContext(TodoContext);
+  const { filteredTodos, getTodos } = useContext(TodoContext);
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    getTodos();
-  }, []);
+    // Fetch todos when the component mounts if a token is present
+    if (token) {
+      getTodos();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
-  if (!todos || todos.length === 0) {
-    return <div className="text-center text-gray-500 mt-8">No tasks yet. Add one above!</div>;
+  if (!filteredTodos || filteredTodos.length === 0) {
+    return <div className="bg-white p-6 rounded-lg shadow-md text-center text-gray-500">No tasks found. Add one above!</div>;
   }
 
   return (
-    <div className="mt-6 space-y-3">
-      {todos.map((todo) => (
-        <div key={todo.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => updateTodo(todo.id, { completed: !todo.completed })}
-              className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
-            />
-            <span className={`text-lg ${todo.completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
-              {todo.task}
-            </span>
-          </div>
-          <button
-            onClick={() => deleteTodo(todo.id)}
-            className="text-red-500 hover:text-red-700 font-medium text-sm px-3 py-1 rounded hover:bg-red-50 transition-colors"
-          >
-            Delete
-          </button>
-        </div>
+    <div className="space-y-2">
+      {filteredTodos.map((todo) => (
+        <TodoItem key={todo._id} todo={todo} />
       ))}
     </div>
   );
