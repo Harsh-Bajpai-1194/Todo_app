@@ -3,8 +3,6 @@ import axios from 'axios';
 
 export const TodoContext = createContext();
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-
 export const TodoProvider = ({ children }) => {
   const [todos, setTodos] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,7 +23,7 @@ export const TodoProvider = ({ children }) => {
 
   const getTodos = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/todos`);
+      const res = await axios.get('/api/todos');
       setTodos(res.data);
     } catch (err) {
       console.error(err);
@@ -34,7 +32,7 @@ export const TodoProvider = ({ children }) => {
 
   const addTodo = async (todo) => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/todos`, todo);
+      const res = await axios.post('/api/todos', todo);
       setTodos((prev) => [res.data, ...prev]);
     } catch (err) {
       console.error(err);
@@ -43,7 +41,7 @@ export const TodoProvider = ({ children }) => {
 
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/todos/${id}`);
+      await axios.delete(`/api/todos/${id}`);
       setTodos((prev) => prev.filter((todo) => todo._id !== id));
     } catch (err) {
       console.error(err);
@@ -52,7 +50,7 @@ export const TodoProvider = ({ children }) => {
 
   const updateTodo = async (id, updatedFields) => {
     try {
-      const res = await axios.put(`${API_BASE_URL}/api/todos/${id}`, updatedFields);
+      const res = await axios.put(`/api/todos/${id}`, updatedFields);
       // Note: MongoDB uses _id
       setTodos((prev) => prev.map((todo) => (todo._id === id ? res.data : todo)));
     } catch (err) {
