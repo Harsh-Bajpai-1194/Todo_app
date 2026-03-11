@@ -1,20 +1,26 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import axios from 'axios';
-// Assuming AuthContext provides the auth token
-// import { AuthContext } from './AuthContext'; 
+import { AuthContext } from './AuthContext'; 
 
 export const TodoContext = createContext();
 
 export const TodoProvider = ({ children }) => {
   const [todos, setTodos] = useState([]);
-  // const { token } = useContext(AuthContext); // Example of getting token
+  const { isAuthenticated } = useContext(AuthContext);
 
-  // In a full-stack integration, this would fetch from your API.
+  // Fetch todos when the user is authenticated, and clear them on logout.
+  useEffect(() => {
+    if (isAuthenticated) {
+      getTodos();
+    } else {
+      setTodos([]);
+    }
+  }, [isAuthenticated]);
+
   const getTodos = async () => {
     try {
-      // const res = await axios.get('/api/todos', { headers: { 'x-auth-token': token } });
-      // setTodos(res.data);
-      console.log("Fetching todos from API...");
+      const res = await axios.get('/api/todos');
+      setTodos(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -22,11 +28,8 @@ export const TodoProvider = ({ children }) => {
 
   const addTodo = async (todo) => {
     try {
-      // const res = await axios.post('/api/todos', todo, { headers: { 'x-auth-token': token } });
-      // setTodos((prev) => [res.data, ...prev]);
-      console.log("Adding todo via API...");
-      // For now, simulate with local state
-      setTodos((prev) => [{ id: Date.now(), ...todo }, ...prev]);
+      const res = await axios.post('/api/todos', todo);
+      setTodos((prev) => [res.data, ...prev]);
     } catch (err) {
       console.error(err);
     }
@@ -34,8 +37,8 @@ export const TodoProvider = ({ children }) => {
 
   const deleteTodo = async (id) => {
     try {
-      // await axios.delete(`/api/todos/${id}`, { headers: { 'x-auth-token': token } });
-      setTodos((prev) => prev.filter((todo) => todo.id !== id));
+      await axios.delete(`/api/todos/${id}`);
+      setTodos((prev) => prev.filter((todo) => todo._id !== id));
     } catch (err) {
       console.error(err);
     }
@@ -43,19 +46,16 @@ export const TodoProvider = ({ children }) => {
 
   const updateTodo = async (id, updatedFields) => {
     try {
-      // const res = await axios.put(`/api/todos/${id}`, updatedFields, { headers: { 'x-auth-token': token } });
-      setTodos((prev) => prev.map((todo) => (todo.id === id ? { ...todo, ...updatedFields } : todo)));
+      const res = await axios.put(`/api/todos/${id}`, updatedFields);
+      setTodos((prev) => prev.map((todo) => (todo._id === id ? res.data : todo)));
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <TodoContext.Provider value={{ todos, addTodo, getTodos, deleteTodo, updateTodo }}>
+    <TodoContext.Provider value={{ todos, addTodo, deleteTodo, updateTodo }}>
       {children}
     </TodoContext.Provider>
   );
 };
-
-// This allows 'import TodoContext' in other files
-export default TodoContext;
