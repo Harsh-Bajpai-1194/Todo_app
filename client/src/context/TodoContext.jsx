@@ -3,9 +3,9 @@ import axios from 'axios';
 
 export const TodoContext = createContext();
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-
 export const TodoProvider = ({ children }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [todos, setTodos] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'completed', 'pending'
@@ -25,46 +25,63 @@ export const TodoProvider = ({ children }) => {
 
   const getTodos = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/todos`);
+      setLoading(true);
+      const res = await axios.get('/api/todos');
+      setError(null);
       setTodos(res.data);
     } catch (err) {
-      console.error(err);
+      setError(err.response?.data?.msg || 'Could not fetch todos.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const addTodo = async (todo) => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/todos`, todo);
+      setLoading(true);
+      const res = await axios.post('/api/todos', todo);
+      setError(null);
       setTodos((prev) => [res.data, ...prev]);
     } catch (err) {
-      console.error(err);
+      setError(err.response?.data?.msg || 'Could not add todo.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/todos/${id}`);
+      setLoading(true);
+      await axios.delete(`/api/todos/${id}`);
+      setError(null);
       setTodos((prev) => prev.filter((todo) => todo._id !== id));
     } catch (err) {
-      console.error(err);
+      setError(err.response?.data?.msg || 'Could not delete todo.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const updateTodo = async (id, updatedFields) => {
     try {
-      const res = await axios.put(`${API_BASE_URL}/api/todos/${id}`, updatedFields);
+      setLoading(true);
+      const res = await axios.put(`/api/todos/${id}`, updatedFields);
+      setError(null);
       // Note: MongoDB uses _id
       setTodos((prev) => prev.map((todo) => (todo._id === id ? res.data : todo)));
     } catch (err) {
-      console.error(err);
+      setError(err.response?.data?.msg || 'Could not update todo.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <TodoContext.Provider value={{ 
-      todos, filteredTodos, 
+      todos, filteredTodos, loading, error,
       addTodo, getTodos, deleteTodo, updateTodo,
-      setSearchTerm, setFilterStatus
+      setSearchTerm, setFilterStatus,
+      clearError: () => setError(null)
     }}>
       {children}
     </TodoContext.Provider>

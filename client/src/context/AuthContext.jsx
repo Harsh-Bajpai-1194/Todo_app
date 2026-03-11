@@ -3,8 +3,6 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [user, setUser] = useState(null);
@@ -27,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/auth`);
+      const res = await axios.get('/api/auth');
       setUser(res.data);
       setIsAuthenticated(true);
     } catch (err) {
@@ -39,7 +37,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/users`, formData);
+      const res = await axios.post('/api/users', formData);
       setToken(res.data.token);
       setError(null);
     } catch (err) {
@@ -50,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (formData) => {
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/auth`, formData);
+      const res = await axios.post('/api/auth', formData);
       setToken(res.data.token);
       setError(null);
     } catch (err) {
