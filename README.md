@@ -59,12 +59,12 @@ A professional project requires a robust backend instead of relying solely on lo
 - [x] **Authentication & Authorization**: Implement secure user login and signup using JSON Web Tokens (JWT) and bcrypt for password hashing. This ensures users can only access their own tasks.
 - [x] **Database Integration (MongoDB)**: Use Mongoose to define a Task schema that includes fields for the task description, time, completion status, and a reference to the User ID.
 
-### Phase 2: Frontend Evolution (React) 🏗️
+### Phase 2: Frontend Evolution (React) ✅
 - [x] Replace the current `index.html` and `app.js` with a component-based React architecture.
 - [x] **State Management**: Use the React Context API to manage the global state of tasks and user authentication status.
 - [x] **Modern UI/UX**: Upgrade `style.css` by using Tailwind CSS.
-- **Features** (Pending):
-  - [ ] **Drag-and-Drop**: Use `react-beautiful-dnd` to allow users to reorder tasks.
+- **Features**:
+  - [x] **Drag-and-Drop**: Use `@hello-pangea/dnd` to allow users to reorder tasks.
   - [x] **Filtering & Sorting**: Allow users to view "Completed," "Pending," or tasks sorted by time.
   - [x] **Search Functionality**: A real-time search bar to find specific tasks.
 

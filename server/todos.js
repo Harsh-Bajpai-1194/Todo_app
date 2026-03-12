@@ -22,21 +22,25 @@ router.get('/', middleware, async (req, res) => {
 // @access   Private
 router.post('/', middleware, async (req, res) => {
     const { task, time, completed } = req.body;
+    const io = req.app.get('socketio');
 
     try {
-        // Get the count of existing todos for this user to set the order.
-        // This ensures new todos are always added to the end.
-        const count = await Todo.countDocuments({ user: req.user.id });
+        // Find the highest current order value to ensure the new todo is added to the end.
+        const lastTodo = await Todo.findOne({ user: req.user.id }).sort({ order: -1 });
+        const newOrder = lastTodo ? lastTodo.order + 1 : 0;
 
         const newTodo = new Todo({
             task,
             time,
             completed,
             user: req.user.id,
-            order: count // New items will have the highest order number
+            order: newOrder,
         });
 
         const todo = await newTodo.save();
+
+        // Emit event to all clients in the user's room that a new todo was created
+        io.to(req.user.id).emit('todo:created', todo);
         res.json(todo);
     } catch (err) {
         console.error(err.message);
@@ -49,6 +53,7 @@ router.post('/', middleware, async (req, res) => {
 // @access   Private
 router.put('/reorder', middleware, async (req, res) => {
     const { orderedIds } = req.body;
+    const io = req.app.get('socketio');
 
     if (!Array.isArray(orderedIds)) {
         return res.status(400).json({ msg: 'Invalid request body, expected orderedIds array.' });
@@ -64,6 +69,9 @@ router.put('/reorder', middleware, async (req, res) => {
 
         if (bulkOps.length > 0) await Todo.bulkWrite(bulkOps);
 
+        // Notify clients that a reorder happened so they can refetch
+        io.to(req.user.id).emit('todos:reordered');
+
         res.json({ msg: 'Todos reordered successfully' });
     } catch (err) {
         console.error(err.message);
@@ -76,6 +84,7 @@ router.put('/reorder', middleware, async (req, res) => {
 // @access   Private
 router.put('/:id', middleware, async (req, res) => {
     const { task, time, completed } = req.body;
+    const io = req.app.get('socketio');
 
     // Build todo object
     const todoFields = {};
@@ -95,6 +104,9 @@ router.put('/:id', middleware, async (req, res) => {
 
         todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { returnDocument: 'after' });
 
+        // Emit event that a todo was updated
+        io.to(req.user.id).emit('todo:updated', todo);
+
         res.json(todo);
     } catch (err) {
         console.error(err.message);
@@ -106,6 +118,7 @@ router.put('/:id', middleware, async (req, res) => {
 // @desc     Delete todo
 // @access   Private
 router.delete('/:id', middleware, async (req, res) => {
+    const io = req.app.get('socketio');
     try {
         let todo = await Todo.findById(req.params.id);
 
@@ -117,6 +130,9 @@ router.delete('/:id', middleware, async (req, res) => {
         }
 
         await Todo.findByIdAndDelete(req.params.id);
+
+        // Emit event that a todo was deleted
+        io.to(req.user.id).emit('todo:deleted', req.params.id);
 
         res.json({ msg: 'Todo removed' });
     } catch (err) {

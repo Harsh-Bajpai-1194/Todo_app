@@ -1,0 +1,9 @@
+{
+  "watch": ["."],
+  "ext": "js,mjs,cjs,json",
+  "ignore": [
+    "node_modules/"
+  ],
+  "verbose": true,
+  "delay": "500ms"
+}

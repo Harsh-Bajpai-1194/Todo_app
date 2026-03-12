@@ -1,5 +1,7 @@
-import { createContext, useState, useContext, useMemo } from "react";
+import { createContext, useState, useContext, useMemo, useEffect, useRef, useCallback } from "react";
 import axios from 'axios';
+import { io } from 'socket.io-client';
+import { AuthContext } from "./AuthContext";
 
 export const TodoContext = createContext();
 
@@ -9,6 +11,61 @@ export const TodoProvider = ({ children }) => {
   const [todos, setTodos] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'completed', 'pending'
+  const { token } = useContext(AuthContext);
+  const socketRef = useRef(null);
+
+  const getTodos = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('/api/todos');
+      setError(null);
+      setTodos(res.data);
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Could not fetch todos.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Effect for managing Socket.io connection
+  useEffect(() => {
+    if (token) {
+      // Connect to the socket server only if we have a token
+      const socket = io('http://localhost:5000', {
+        auth: { token }
+      });
+      socketRef.current = socket;
+
+      // Listen for real-time updates
+      socket.on('todo:created', (newTodo) => {
+        // Add the new todo, but check to prevent duplicates if this client initiated the action
+        setTodos((prev) => prev.find(t => t._id === newTodo._id) ? prev : [...prev, newTodo]);
+      });
+
+      socket.on('todo:deleted', (deletedId) => {
+        setTodos((prev) => prev.filter((todo) => todo._id !== deletedId));
+      });
+
+      socket.on('todo:updated', (updatedTodo) => {
+        setTodos((prev) =>
+          prev.map((todo) =>
+            todo._id === updatedTodo._id ? updatedTodo : todo
+          )
+        );
+      });
+
+      // For reordering, the simplest approach is to refetch all todos
+      // to ensure the order is correct across all clients.
+      socket.on('todos:reordered', () => {
+        getTodos();
+      });
+
+      // Clean up on unmount or token change
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [token, getTodos]); // Rerun effect if the token changes (login/logout)
 
   // Memoize the derived state to prevent re-computation on every render
   const filteredTodos = useMemo(() => {
@@ -23,28 +80,12 @@ export const TodoProvider = ({ children }) => {
       );
   }, [todos, searchTerm, filterStatus]);
 
-  const getTodos = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get('/api/todos');
-      setError(null);
-      setTodos(res.data);
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Could not fetch todos.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const addTodo = async (todo) => {
     try {
       setLoading(true);
-      const res = await axios.post('/api/todos', todo);
+      // State is updated via socket event, no need to manually update here.
+      await axios.post('/api/todos', todo);
       setError(null);
-      // Append the new todo instead of prepending.
-      // The backend assigns a high `order` value (Date.now()), so in an ascending sort,
-      // new items should appear at the end. This keeps client state consistent with the database.
-      setTodos((prev) => [...prev, res.data]);
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not add todo.');
     } finally {
@@ -54,34 +95,21 @@ export const TodoProvider = ({ children }) => {
 
   const deleteTodo = async (id) => {
     try {
-      setLoading(true);
+      // State is updated via socket event.
       await axios.delete(`/api/todos/${id}`);
       setError(null);
-      setTodos((prev) => prev.filter((todo) => todo._id !== id));
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not delete todo.');
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   const updateTodo = async (id, updatedFields) => {
-    const originalTodos = todos;
-    // Optimistically update the UI to feel more responsive
-    setTodos((prev) =>
-      prev.map((todo) =>
-        todo._id === id ? { ...todo, ...updatedFields } : todo
-      )
-    );
-
     try {
-      // The backend response `res.data` could be used to sync the state,
-      // but for a simple toggle, this optimistic update is sufficient.
+      // State is updated via socket event.
       await axios.put(`/api/todos/${id}`, updatedFields);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not update todo.');
-      setTodos(originalTodos); // Revert on error
     }
   };
 
