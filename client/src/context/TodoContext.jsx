@@ -41,7 +41,10 @@ export const TodoProvider = ({ children }) => {
       setLoading(true);
       const res = await axios.post('/api/todos', todo);
       setError(null);
-      setTodos((prev) => [res.data, ...prev]);
+      // Append the new todo instead of prepending.
+      // The backend assigns a high `order` value (Date.now()), so in an ascending sort,
+      // new items should appear at the end. This keeps client state consistent with the database.
+      setTodos((prev) => [...prev, res.data]);
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not add todo.');
     } finally {
@@ -76,24 +79,33 @@ export const TodoProvider = ({ children }) => {
     }
   };
 
-  const onDragEnd = (result) => {
+  const onDragEnd = async (result) => {
     if (!result.destination) {
       return;
     }
 
-    // This implementation only reorders on the client-side. For persistence, 
-    // an 'order' field and a backend update endpoint would be required.
-    // It also disables reordering when filters are active to prevent inconsistencies.
     if (filterStatus !== 'all' || searchTerm !== '') {
       console.warn("Reordering is disabled when filters or search are active.");
       return;
     }
 
-    const items = Array.from(todos);
+    const originalTodos = [...todos];
+    // Reorder the `filteredTodos` array because its indices match the drag-and-drop result.
+    // The guard clause above ensures that no items are missing from the filtered list during the operation.
+    const items = Array.from(filteredTodos);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
+    // Optimistic UI update
     setTodos(items);
+
+    try {
+      const orderedIds = items.map(item => item._id);
+      await axios.put('/api/todos/reorder', { orderedIds });
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Could not reorder tasks.');
+      setTodos(originalTodos); // Revert on error
+    }
   };
 
   return (

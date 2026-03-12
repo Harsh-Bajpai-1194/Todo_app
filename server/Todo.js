@@ -16,6 +16,10 @@ const TodoSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  order: {
+    type: Number,
+    default: 0,
+  },
   date: {
     type: Date,
     default: Date.now,
