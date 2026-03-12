@@ -20,6 +20,11 @@ const TodoSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  order: {
+    type: Number,
+    // Default to 0 for existing tasks that don't have an order.
+    default: 0,
+  },
 });
 
 module.exports = mongoose.model('todo', TodoSchema);

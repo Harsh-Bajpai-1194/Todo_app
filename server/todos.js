@@ -8,8 +8,8 @@ const Todo = require('./Todo');
 // @access   Private
 router.get('/', middleware, async (req, res) => {
     try {
-        // Find todos by the user id from the auth middleware and sort by the most recent
-        const todos = await Todo.find({ user: req.user.id }).sort({ date: -1 });
+        // Find todos by the user id and sort by the custom order
+        const todos = await Todo.find({ user: req.user.id }).sort({ order: 'asc' });
         res.json(todos);
     } catch (err) {
         console.error(err.message);
@@ -24,15 +24,47 @@ router.post('/', middleware, async (req, res) => {
     const { task, time, completed } = req.body;
 
     try {
+        // Get the count of existing todos for this user to set the order.
+        // This ensures new todos are always added to the end.
+        const count = await Todo.countDocuments({ user: req.user.id });
+
         const newTodo = new Todo({
             task,
             time,
             completed,
-            user: req.user.id
+            user: req.user.id,
+            order: count // New items will have the highest order number
         });
 
         const todo = await newTodo.save();
         res.json(todo);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route    PUT api/todos/reorder
+// @desc     Reorder todos
+// @access   Private
+router.put('/reorder', middleware, async (req, res) => {
+    const { orderedIds } = req.body;
+
+    if (!Array.isArray(orderedIds)) {
+        return res.status(400).json({ msg: 'Invalid request body, expected orderedIds array.' });
+    }
+
+    try {
+        const bulkOps = orderedIds.map((id, index) => ({
+            updateOne: {
+                filter: { _id: id, user: req.user.id },
+                update: { $set: { order: index } }
+            }
+        }));
+
+        if (bulkOps.length > 0) await Todo.bulkWrite(bulkOps);
+
+        res.json({ msg: 'Todos reordered successfully' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -61,7 +93,7 @@ router.put('/:id', middleware, async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { new: true });
+        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { returnDocument: 'after' });
 
         res.json(todo);
     } catch (err) {
