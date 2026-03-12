@@ -41,7 +41,11 @@ export const AuthProvider = ({ children }) => {
       setToken(res.data.token);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.msg || 'Registration failed');
+      if (err.response) {
+        setError(err.response.data.msg || 'Registration failed');
+      } else {
+        setError('Cannot connect to server. Is it running?');
+      }
       setToken(null);
     }
   };
@@ -52,7 +56,11 @@ export const AuthProvider = ({ children }) => {
       setToken(res.data.token);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.msg || 'Login failed');
+      if (err.response) {
+        setError(err.response.data.msg || 'Login failed');
+      } else {
+        setError('Cannot connect to server. Is it running?');
+      }
       setToken(null);
     }
   };
