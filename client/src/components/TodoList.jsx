@@ -1,5 +1,4 @@
 import React, { useContext, useEffect } from 'react';
- import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 import { StrictModeDroppable } from './StrictModeDroppable';
 import { TodoContext } from '../context/TodoContext';
@@ -24,7 +23,6 @@ const TodoList = () => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="todos">
       <StrictModeDroppable droppableId="todos">
         {(provided) => (
           <div
@@ -48,7 +46,6 @@ const TodoList = () => {
             {provided.placeholder}
           </div>
         )}
-      </Droppable>
       </StrictModeDroppable>
     </DragDropContext>
   );
