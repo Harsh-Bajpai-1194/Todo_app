@@ -76,10 +76,30 @@ export const TodoProvider = ({ children }) => {
     }
   };
 
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    // This implementation only reorders on the client-side. For persistence, 
+    // an 'order' field and a backend update endpoint would be required.
+    // It also disables reordering when filters are active to prevent inconsistencies.
+    if (filterStatus !== 'all' || searchTerm !== '') {
+      console.warn("Reordering is disabled when filters or search are active.");
+      return;
+    }
+
+    const items = Array.from(todos);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setTodos(items);
+  };
+
   return (
     <TodoContext.Provider value={{ 
       todos, filteredTodos, loading, error,
-      addTodo, getTodos, deleteTodo, updateTodo,
+      addTodo, getTodos, deleteTodo, updateTodo, onDragEnd,
       setSearchTerm, setFilterStatus,
       clearError: () => setError(null)
     }}>

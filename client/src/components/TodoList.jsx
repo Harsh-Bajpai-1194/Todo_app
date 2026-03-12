@@ -1,10 +1,13 @@
 import React, { useContext, useEffect } from 'react';
+ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable } from 'react-beautiful-dnd';
+import { StrictModeDroppable } from './StrictModeDroppable';
 import { TodoContext } from '../context/TodoContext';
 import { AuthContext } from '../context/AuthContext';
 import TodoItem from './TodoItem';
 
 const TodoList = () => {
-  const { filteredTodos, getTodos } = useContext(TodoContext);
+  const { filteredTodos, getTodos, onDragEnd } = useContext(TodoContext);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -20,11 +23,34 @@ const TodoList = () => {
   }
 
   return (
-    <div className="space-y-2">
-      {filteredTodos.map((todo) => (
-        <TodoItem key={todo._id} todo={todo} />
-      ))}
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="todos">
+      <StrictModeDroppable droppableId="todos">
+        {(provided) => (
+          <div
+            className="space-y-2"
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {filteredTodos.map((todo, index) => (
+              <Draggable key={todo._id} draggableId={todo._id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    <TodoItem todo={todo} />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+      </StrictModeDroppable>
+    </DragDropContext>
   );
 };
 

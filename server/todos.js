@@ -61,7 +61,7 @@ router.put('/:id', middleware, async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { new: true });
+        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { returnDocument: 'after' });
 
         res.json(todo);
     } catch (err) {
