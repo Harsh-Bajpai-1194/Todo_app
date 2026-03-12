@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useMemo, useEffect, useRef, useCallback } from "react";
-import axios from 'axios';
 import { io } from 'socket.io-client';
+import api from "../api";
 import { AuthContext } from "./AuthContext";
 
 export const TodoContext = createContext();
@@ -13,11 +13,14 @@ export const TodoProvider = ({ children }) => {
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'completed', 'pending'
   const { token } = useContext(AuthContext);
   const socketRef = useRef(null);
+  const todosRef = useRef(todos);
+  const lastCheckedMinuteRef = useRef(-1);
+  const notifiedTasksRef = useRef(new Set());
 
   const getTodos = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/todos');
+      const res = await api.get('/todos');
       setError(null);
       setTodos(res.data);
     } catch (err) {
@@ -27,19 +30,30 @@ export const TodoProvider = ({ children }) => {
     }
   }, []);
 
+  // Keep the todosRef updated with the latest todos
+  useEffect(() => {
+    todosRef.current = todos;
+  }, [todos]);
+
   // Effect for managing Socket.io connection
   useEffect(() => {
     if (token) {
       // Connect to the socket server only if we have a token
-      const socket = io('http://localhost:5000', {
+      // Connect to the origin. The request will be proxied by the Vite dev server.
+      const socket = io({
         auth: { token }
       });
       socketRef.current = socket;
 
       // Listen for real-time updates
       socket.on('todo:created', (newTodo) => {
-        // Add the new todo, but check to prevent duplicates if this client initiated the action
-        setTodos((prev) => prev.find(t => t._id === newTodo._id) ? prev : [...prev, newTodo]);
+        // Add the new todo, but only if it doesn't already exist in the state.
+        // This prevents duplicates on the client that initiated the action,
+        // as that client adds the todo via the HTTP response.
+        setTodos((prev) => {
+          const exists = prev.some(t => t._id === newTodo._id);
+          return exists ? prev : [...prev, newTodo];
+        });
       });
 
       socket.on('todo:deleted', (deletedId) => {
@@ -67,6 +81,44 @@ export const TodoProvider = ({ children }) => {
     }
   }, [token, getTodos]); // Rerun effect if the token changes (login/logout)
 
+  // Effect for requesting notification permission on load
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Effect for checking for due tasks and sending notifications
+  useEffect(() => {
+    const checkDueTasks = () => {
+      if (Notification.permission !== "granted") return;
+
+      const now = new Date();
+      const currentMinute = now.getMinutes();
+
+      if (currentMinute !== lastCheckedMinuteRef.current) {
+        notifiedTasksRef.current.clear();
+        lastCheckedMinuteRef.current = currentMinute;
+      }
+
+      const currentTime = `${now.getHours().toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+
+      // Use the ref to access the latest todos without re-running the effect
+      todosRef.current.forEach(todo => {
+        if (todo.time === currentTime && !todo.completed && !notifiedTasksRef.current.has(todo._id)) {
+          new Notification('Todo App: Task Due!', {
+            body: `Your task "${todo.task}" is due now.`,
+            icon: '/vite.svg' // Using the default Vite logo from the public folder
+          });
+          notifiedTasksRef.current.add(todo._id); // Mark as notified for this minute
+        }
+      });
+    };
+
+    const intervalId = setInterval(checkDueTasks, 30000); // Check every 30 seconds
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, []); // Empty dependency array ensures this runs only once
+
   // Memoize the derived state to prevent re-computation on every render
   const filteredTodos = useMemo(() => {
     return todos
@@ -80,11 +132,15 @@ export const TodoProvider = ({ children }) => {
       );
   }, [todos, searchTerm, filterStatus]);
 
-  const addTodo = async (todo) => {
+  const addTodo = async (todoData) => {
     try {
       setLoading(true);
-      // State is updated via socket event, no need to manually update here.
-      await axios.post('/api/todos', todo);
+      // Get the full todo object back from the API response.
+      const res = await api.post('/todos', todoData);
+      // Update state immediately with the response. This is more reliable
+      // than waiting for the socket event and ensures the notification
+      // checker has the most up-to-date data instantly.
+      setTodos(prev => [...prev, res.data]);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not add todo.');
@@ -94,22 +150,38 @@ export const TodoProvider = ({ children }) => {
   };
 
   const deleteTodo = async (id) => {
+    const originalTodos = [...todos];
+    // Optimistic UI Update: Remove the todo from the UI immediately.
+    setTodos(prev => prev.filter(todo => todo._id !== id));
+
     try {
-      // State is updated via socket event.
-      await axios.delete(`/api/todos/${id}`);
+      // The socket event will update other clients.
+      await api.delete(`/todos/${id}`);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not delete todo.');
+      // If the API call fails, revert the UI to its original state.
+      setTodos(originalTodos);
     } 
   };
 
   const updateTodo = async (id, updatedFields) => {
+    const originalTodos = [...todos];
+    // Optimistic UI Update: Apply changes immediately.
+    setTodos(prev =>
+      prev.map(todo =>
+        todo._id === id ? { ...todo, ...updatedFields } : todo
+      )
+    );
+
     try {
-      // State is updated via socket event.
-      await axios.put(`/api/todos/${id}`, updatedFields);
+      // The socket event will update other clients.
+      await api.put(`/todos/${id}`, updatedFields);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not update todo.');
+      // If the API call fails, revert the UI to its original state.
+      setTodos(originalTodos);
     }
   };
 
@@ -135,7 +207,7 @@ export const TodoProvider = ({ children }) => {
 
     try {
       const orderedIds = items.map(item => item._id);
-      await axios.put('/api/todos/reorder', { orderedIds });
+      await api.put('/todos/reorder', { orderedIds });
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not reorder tasks.');
       setTodos(originalTodos); // Revert on error

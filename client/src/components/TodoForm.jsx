@@ -3,14 +3,17 @@ import { TodoContext } from '../context/TodoContext';
 
 const TodoForm = () => {
   const [task, setTask] = useState('');
+  const [time, setTime] = useState('');
   const { addTodo } = useContext(TodoContext);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!task.trim()) return;
     
-    addTodo({ task });
+    // Send undefined if time is empty so it's not stored in the DB
+    addTodo({ task, time: time || undefined });
     setTask('');
+    setTime('');
   };
 
   return (
@@ -21,7 +24,13 @@ const TodoForm = () => {
           value={task}
           onChange={(e) => setTask(e.target.value)}
           placeholder="What needs to be done?"
-          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           type="submit"

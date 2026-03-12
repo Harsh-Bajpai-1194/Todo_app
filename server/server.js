@@ -33,7 +33,7 @@ app.get('/', (req, res) => res.json({ msg: 'Welcome to the Todo API...' }));
 
 // Define Routes
 app.use('/api/users', require('./users'));
-app.use('/api/auth', require('./auth').router);
+app.use('/api/auth', require('./auth'));
 app.use('/api/todos', require('./todos'));
 
 // Make io accessible to our router by setting it on the app

@@ -1,5 +1,5 @@
-import { createContext, useState, useEffect } from "react";
-import axios from 'axios';
+import { createContext, useState, useEffect, useCallback } from "react";
+import api from '../api';
 
 export const AuthContext = createContext();
 
@@ -10,22 +10,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['x-auth-token'] = token;
-      localStorage.setItem('token', token);
-      loadUser();
-    } else {
-      delete axios.defaults.headers.common['x-auth-token'];
-      localStorage.removeItem('token');
-      setIsAuthenticated(false);
-      setLoading(false);
-    }
-  }, [token]);
-
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     try {
-      const res = await axios.get('/api/auth');
+      const res = await api.get('/auth');
       setUser(res.data);
       setIsAuthenticated(true);
     } catch (err) {
@@ -33,11 +20,23 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token);
+      loadUser();
+    } else {
+      localStorage.removeItem('token');
+      setIsAuthenticated(false);
+      setLoading(false);
+      setUser(null); // Ensure user state is cleared
+    }
+  }, [token, loadUser]);
 
   const register = async (formData) => {
     try {
-      const res = await axios.post('/api/users', formData);
+      const res = await api.post('/users', formData);
       setToken(res.data.token);
       setError(null);
     } catch (err) {
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (formData) => {
     try {
-      const res = await axios.post('/api/auth', formData);
+      const res = await api.post('/auth', formData);
       setToken(res.data.token);
       setError(null);
     } catch (err) {
@@ -64,8 +63,11 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  // Function to allow components to clear the error state
+  const clearError = () => setError(null);
+
   return (
-    <AuthContext.Provider value={{ token, user, isAuthenticated, loading, error, register, login, logout }}>
+    <AuthContext.Provider value={{ token, user, isAuthenticated, loading, error, register, login, logout, clearError }}>
       {children}
     </AuthContext.Provider>
   );

@@ -7,10 +7,12 @@ This is a full-stack Todo application featuring a Node.js backend with Express a
 - **server/**: Contains the backend code.
   - `server.js`: Application entry point.
   - `config/db.js`: Database connection logic.
-  - `auth.js`: Authentication routes and middleware.
-  - `users.js`: User registration routes.
-  - `todos.js`: Todo CRUD routes.
-  - `User.js`, `Todo.js`: Mongoose data models.
+  - `middleware/auth.js`: Authentication middleware.
+  - `routes/`: Contains the API route definitions.
+    - `auth.js`: Authentication routes (login, get user).
+    - `users.js`: User registration route.
+    - `todos.js`: Todo CRUD routes.
+  - `models/`: Contains Mongoose data models (`User.js`, `Todo.js`).
 - **client/**: Contains the frontend React application.
   - `src/main.jsx`: Client entry point.
   - `src/App.jsx`: Root React component.
@@ -55,7 +57,7 @@ This is a full-stack Todo application featuring a Node.js backend with Express a
 
 ### Phase 1: Architecture & Backend (Node.js & Express) ✅
 A professional project requires a robust backend instead of relying solely on localStorage.
-- [x] **RESTful API Design**: Build a structured API with endpoints like `GET /api/tasks`, `POST /api/tasks`, `PUT /api/tasks/:id` (for toggling completion), and `DELETE /api/tasks/:id`.
+- [x] **RESTful API Design**: Build a structured API with endpoints like `GET /api/todos`, `POST /api/todos`, `PUT /api/todos/:id` (for toggling completion), and `DELETE /api/todos/:id`.
 - [x] **Authentication & Authorization**: Implement secure user login and signup using JSON Web Tokens (JWT) and bcrypt for password hashing. This ensures users can only access their own tasks.
 - [x] **Database Integration (MongoDB)**: Use Mongoose to define a Task schema that includes fields for the task description, time, completion status, and a reference to the User ID.
 
@@ -70,8 +72,8 @@ A professional project requires a robust backend instead of relying solely on lo
 
 ### Phase 3: Advanced "FAANG-Ready" Features
 To stand out, incorporate complex engineering challenges:
-- [ ] **Real-time Updates**: Use Socket.io to sync tasks across multiple tabs or devices instantly.
-- [ ] **Push Notifications**: Integrate the Web Notifications API to remind users of tasks at their specified "time".
+- [x] **Real-time Updates**: Use Socket.io to sync tasks across multiple tabs or devices instantly.
+- [x] **Push Notifications**: Integrate the Web Notifications API to remind users of tasks at their specified "time".
 - [ ] **Data Visualization**: Add a dashboard using Chart.js to show productivity trends (e.g., tasks completed per day).
 - [ ] **PWA Support**: Convert the app into a Progressive Web App (PWA) so it can be installed on mobile devices and work offline using Service Workers.
 

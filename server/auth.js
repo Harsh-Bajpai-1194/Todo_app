@@ -2,32 +2,13 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const User = require('./User');
-
-// Middleware to verify token
-const middleware = function (req, res, next) {
-    // Get token from header
-    const token = req.header('x-auth-token');
-
-    // Check if no token
-    if (!token) {
-        return res.status(401).json({ msg: 'No token, authorization denied' });
-    }
-
-    // Verify token
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded.user;
-        next();
-    } catch (err) {
-        res.status(401).json({ msg: 'Token is not valid' });
-    }
-};
+const User = require('./models/User');
+const authMiddleware = require('./middleware/auth');
 
 // @route    GET api/auth
 // @desc     Get logged in user
 // @access   Private
-router.get('/', middleware, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         res.json(user);
@@ -68,7 +49,4 @@ router.post('/', async (req, res) => {
     }
 });
 
-module.exports = {
-    router,
-    middleware
-};
+module.exports = router;

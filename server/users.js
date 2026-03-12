@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
-const User = require('./User');
+const User = require('./models/User');
 
 // @route    POST api/users
 // @desc     Register a user
@@ -27,7 +27,7 @@ router.post(
       let user = await User.findOne({ email });
 
       if (user) {
-        return res.status(400).json({ errors: [{ msg: 'User already exists' }] });
+        return res.status(400).json({ msg: 'User already exists' });
       }
 
       user = new User({

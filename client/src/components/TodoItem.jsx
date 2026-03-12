@@ -17,16 +17,25 @@ const TodoItem = ({ todo }) => {
           onChange={handleToggleComplete}
           className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
         />
-        <span className={`flex-1 ${todo.completed ? 'line-through' : ''}`}>
-          {todo.task}
-        </span>
+        <div className="flex-1">
+          <span className={`${todo.completed ? 'line-through' : ''}`}>
+            {todo.task}
+          </span>
+          {todo.time && (
+            <span className="ml-3 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-200 rounded-full">
+              {todo.time}
+            </span>
+          )}
+        </div>
       </div>
-      <button
-        onClick={() => deleteTodo(todo._id)}
-        className="text-red-500 hover:text-red-700 font-semibold px-3 py-1"
-      >
-        Delete
-      </button>
+      <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+        <button
+          onClick={() => deleteTodo(todo._id)}
+          className="text-red-500 hover:text-red-700 font-semibold px-3 py-1"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   );
 };

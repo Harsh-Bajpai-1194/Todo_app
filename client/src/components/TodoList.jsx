@@ -12,8 +12,7 @@ const TodoList = () => {
     if (token) {
       getTodos();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, getTodos]);
 
   const isDragDisabled = filterStatus !== 'all' || searchTerm !== '';
 
