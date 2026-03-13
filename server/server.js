@@ -32,9 +32,9 @@ app.use(express.json());
 app.get('/', (req, res) => res.json({ msg: 'Welcome to the Todo API...' }));
 
 // Define Routes
-app.use('/api/users', require('./users'));
-app.use('/api/auth', require('./auth'));
-app.use('/api/todos', require('./todos'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/todos', require('./routes/todos'));
 
 // Make io accessible to our router by setting it on the app
 app.set('socketio', io);
@@ -78,4 +78,10 @@ server.on('error', (error) => {
   }
 });
 
-startServer();
+// Only start the server if this file is run directly (not when imported for tests)
+if (require.main === module) {
+  startServer();
+}
+
+// Export the server for testing purposes
+module.exports = server;

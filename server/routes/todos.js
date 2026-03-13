@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('./middleware/auth');
+const authMiddleware = require('../middleware/auth');
 const {
     getTodos,
     addTodo,
@@ -8,7 +8,7 @@ const {
     getTodoStats,
     updateTodo,
     deleteTodo
-} = require('./controllers/todoController');
+} = require('../controllers/todoController');
 
 // @route    GET api/todos
 // @desc     Get all user's todos

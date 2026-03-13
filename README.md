@@ -79,7 +79,7 @@ To stand out, incorporate complex engineering challenges:
 
 ### Phase 4: DevOps & Quality Assurance
 FAANG companies value engineers who understand the full software development life cycle.
-- [ ] **Unit & Integration Testing**: Write tests using Jest and React Testing Library to ensure your components and API endpoints work as expected.
+- [x] **Unit & Integration Testing**: Write tests using Jest and React Testing Library to ensure your components and API endpoints work as expected.
 - [ ] **CI/CD Pipeline**: Set up GitHub Actions to automatically run tests and deploy the app whenever you push code.
 - [ ] **Containerization**: Use Docker to containerize the frontend, backend, and database for consistent environments.
 - [ ] **Deployment**: Deploy the backend on AWS (EC2 or Lambda) or Render, and the frontend on Vercel or Netlify.

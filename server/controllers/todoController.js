@@ -125,9 +125,9 @@ exports.updateTodo = async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        // We pass the { new: true } option to get the updated document back.
+        // We pass the { returnDocument: 'after' } option to get the updated document back.
         // This ensures the frontend and socket events receive the latest data.
-        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { new: true });
+        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { returnDocument: 'after' });
 
         // Emit event that a todo was updated
         io.to(req.user.id).emit('todo:updated', todo);
