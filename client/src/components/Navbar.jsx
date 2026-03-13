@@ -9,6 +9,11 @@ const Navbar = () => {
     <>
       <li className="text-white">Hello, {user && user.name}</li>
       <li>
+        <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-blue-700">
+          Dashboard
+        </Link>
+      </li>
+      <li>
         <button onClick={logout} className="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">
           Logout
         </button>

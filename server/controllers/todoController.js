@@ -70,6 +70,40 @@ exports.reorderTodos = async (req, res) => {
     }
 };
 
+// @desc     Get todo statistics (e.g., completed per day for the last 7 days)
+exports.getTodoStats = async (req, res) => {
+    try {
+        const userTimezone = req.query.timezone || 'UTC'; // Get timezone from client, default to UTC
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        // Note: This aggregation relies on the `updatedAt` timestamp, which is automatically
+        // managed by Mongoose if `timestamps: true` is set in your Todo model schema.
+        const stats = await Todo.aggregate([
+            // Filter for the user's todos that were completed in the last 7 days
+            {
+                $match: {
+                    user: req.user.id,
+                    completed: true,
+                    updatedAt: { $gte: sevenDaysAgo }
+                }
+            },
+            // Group by the date part of 'updatedAt' and count them
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt", timezone: userTimezone } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } } // Sort by date
+        ]);
+        res.json(stats);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
 // @desc     Update todo
 exports.updateTodo = async (req, res) => {
     const { task, time, completed } = req.body;
@@ -91,7 +125,9 @@ exports.updateTodo = async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { returnDocument: 'after' });
+        // We pass the { new: true } option to get the updated document back.
+        // This ensures the frontend and socket events receive the latest data.
+        todo = await Todo.findByIdAndUpdate(req.params.id, { $set: todoFields }, { new: true });
 
         // Emit event that a todo was updated
         io.to(req.user.id).emit('todo:updated', todo);

@@ -74,8 +74,8 @@ A professional project requires a robust backend instead of relying solely on lo
 To stand out, incorporate complex engineering challenges:
 - [x] **Real-time Updates**: Use Socket.io to sync tasks across multiple tabs or devices instantly.
 - [x] **Push Notifications**: Integrate the Web Notifications API to remind users of tasks at their specified "time".
-- [ ] **Data Visualization**: Add a dashboard using Chart.js to show productivity trends (e.g., tasks completed per day).
-- [ ] **PWA Support**: Convert the app into a Progressive Web App (PWA) so it can be installed on mobile devices and work offline using Service Workers.
+- [x] **Data Visualization**: Add a dashboard using Chart.js to show productivity trends (e.g., tasks completed per day).
+- [x] **PWA Support**: Convert the app into a Progressive Web App (PWA) so it can be installed on mobile devices and work offline using Service Workers.
 
 ### Phase 4: DevOps & Quality Assurance
 FAANG companies value engineers who understand the full software development life cycle.

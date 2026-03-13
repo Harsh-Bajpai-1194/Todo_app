@@ -90,26 +90,6 @@ export const TodoProvider = ({ children }) => {
 
   // Effect for checking for due tasks and sending notifications
   useEffect(() => {
-    const time12to24 = (time12h) => {
-      // Return early if the format is unexpected (e.g., already 24h or null)
-      if (!time12h || typeof time12h !== 'string' || !time12h.includes(' ')) {
-        return time12h;
-      }
-      const match = time12h.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-      if (!match) return time12h;
-
-      let [, hours, minutes, modifier] = match;
-      hours = parseInt(hours, 10);
-
-      if (modifier.toUpperCase() === 'PM' && hours < 12) {
-        hours += 12;
-      }
-      if (modifier.toUpperCase() === 'AM' && hours === 12) {
-        hours = 0; // Midnight case
-      }
-      return `${hours.toString().padStart(2, '0')}:${minutes}`;
-    };
-
     const checkDueTasks = () => {
       if (Notification.permission !== "granted") return;
 
@@ -126,8 +106,8 @@ export const TodoProvider = ({ children }) => {
 
       // Use the ref to access the latest todos without re-running the effect
       todosRef.current.forEach(todo => {
-        const todoTime24 = time12to24(todo.time);
-        if (todoTime24 === currentTime && !todo.completed && !notifiedTasksRef.current.has(todo._id)) {
+        // The <input type="time"> already provides time in 24-hour "HH:mm" format.
+        if (todo.time === currentTime && !todo.completed && !notifiedTasksRef.current.has(todo._id)) {
           new Notification('Todo App: Task Due!', {
             body: `Your task "${todo.task}" is due now.`,
             icon: '/vite.svg' // Using the default Vite logo from the public folder

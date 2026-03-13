@@ -5,6 +5,7 @@ const {
     getTodos,
     addTodo,
     reorderTodos,
+    getTodoStats,
     updateTodo,
     deleteTodo
 } = require('./controllers/todoController');
@@ -13,6 +14,11 @@ const {
 // @desc     Get all user's todos
 // @access   Private
 router.get('/', authMiddleware, getTodos);
+
+// @route    GET api/todos/stats
+// @desc     Get statistics for user's todos
+// @access   Private
+router.get('/stats', authMiddleware, getTodoStats);
 
 // @route    POST api/todos
 // @desc     Add new todo

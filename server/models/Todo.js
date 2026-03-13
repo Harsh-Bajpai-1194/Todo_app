@@ -25,6 +25,9 @@ const TodoSchema = new mongoose.Schema({
     // Default to 0 for existing tasks that don't have an order.
     default: 0,
   },
+}, {
+  // Add timestamps (createdAt, updatedAt)
+  timestamps: true
 });
 
 module.exports = mongoose.model('todo', TodoSchema);
