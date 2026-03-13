@@ -11,11 +11,17 @@ const server = http.createServer(app);
 // Load Env Vars
 require('dotenv').config({ path: './.env' });
 
-// Init Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-}));
+// Check for required environment variables for email functionality
+if (!process.env.EMAIL_USERNAME || !process.env.EMAIL_PASSWORD) {
+  console.error('\x1b[31m%s\x1b[0m', 'FATAL ERROR: EMAIL_USERNAME and EMAIL_PASSWORD must be defined in your .env file for OTP emails to work.');
+  console.error('Please ensure a .env file exists in the /server directory with these values.');
+  process.exit(1);
+}
+
+// Middleware for parsing JSON and urlencoded form data
+// It's important to have these before the routes.
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 const io = new Server(server, {
   cors: {
@@ -27,7 +33,10 @@ const io = new Server(server, {
 // Socket.io authentication middleware
 io.use(socketAuth);
 
-app.use(express.json());
+app.use(cors({
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 
 app.get('/', (req, res) => res.json({ msg: 'Welcome to the Todo API...' }));
 
