@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api';
@@ -10,8 +10,14 @@ const Login = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { completeLogin } = useContext(AuthContext);
+  const { completeLogin, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -34,10 +40,8 @@ const Login = () => {
     try {
       const res = await api.post('/auth/verify-otp', { email, otp });
       completeLogin(res.data.token);
-      navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.msg || 'OTP verification failed');
-      setShowOtpInput(false); // Go back to login form
+      setError(err.response?.data?.msg || 'Invalid OTP. Please try again.');
       setOtp('');
     } finally {
       setLoading(false);

@@ -1,0 +1,35 @@
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: todo-mongo
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    container_name: todo-server
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/todo-app
+      - JWT_SECRET=your_jwt_secret_for_docker
+      - CLIENT_URL=http://localhost:8080
+      - EMAIL_USERNAME=your_email@example.com # Replace with your actual email
+      - EMAIL_PASSWORD=your_email_password   # Replace with your actual password
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: todo-client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+    driver: local

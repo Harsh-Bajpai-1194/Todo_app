@@ -41,6 +41,25 @@ This is a full-stack Todo application featuring a Node.js backend with Express a
     npm run dev
     ```
 
+## Running with Docker (Production)
+
+You can run the production-like application stack using Docker Compose. This builds the frontend for production and serves it with Nginx.
+
+1.  Make sure you have Docker and Docker Compose installed.
+2.  From the root of the project, run:
+    ```bash
+    docker-compose up --build
+    ```
+3.  The application will be available at `http://localhost:8080`.
+
+## Running with Docker (Development)
+To run the application with hot-reloading for both frontend and backend, simply run:
+    ```bash
+    docker-compose up --build
+    ```
+3.  The application will be available at `http://localhost:5173`. Docker Compose automatically uses `docker-compose.override.yml` to enable the development environment.
+
+
 ## API Endpoints
 
 | Method | Endpoint       | Description           | Access  |
@@ -80,8 +99,8 @@ To stand out, incorporate complex engineering challenges:
 ### Phase 4: DevOps & Quality Assurance
 FAANG companies value engineers who understand the full software development life cycle.
 - [x] **Unit & Integration Testing**: Write tests using Jest and React Testing Library to ensure your components and API endpoints work as expected.
-- [ ] **CI/CD Pipeline**: Set up GitHub Actions to automatically run tests and deploy the app whenever you push code.
-- [ ] **Containerization**: Use Docker to containerize the frontend, backend, and database for consistent environments.
+ - [x] **CI/CD Pipeline**: Set up GitHub Actions to automatically run tests whenever you push code.
+ - [x] **Containerization**: Use Docker to containerize the frontend, backend, and database for consistent environments.
 - [ ] **Deployment**: Deploy the backend on AWS (EC2 or Lambda) or Render, and the frontend on Vercel or Netlify.
 
 ## Resume Impact Strategy

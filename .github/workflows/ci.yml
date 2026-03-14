@@ -1,0 +1,64 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: server/package-lock.json
+    - name: Install Backend Dependencies
+      run: npm install
+      working-directory: ./server
+    - name: Run Backend Tests
+      run: npm test
+      working-directory: ./server
+      env:
+        MONGO_URI: mongodb://localhost:27017/todo-test
+        JWT_SECRET: a-secret-for-ci-tests
+        # These are required by server.js but not used in tests that don't send emails
+        EMAIL_USERNAME: dummy@example.com
+        EMAIL_PASSWORD: dummypassword
+
+  frontend-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: client/package-lock.json
+    - name: Install Frontend Dependencies
+      run: npm install
+      working-directory: ./client
+    - name: Run Frontend Tests
+      run: npm test
+      working-directory: ./client

@@ -1,0 +1,24 @@
+services:
+  server:
+    # Override the command to use nodemon for hot-reloading
+    command: npm run dev
+    environment:
+      # Ensure the server allows connections from the Vite dev server
+      - CLIENT_URL=http://localhost:5173
+    volumes:
+      # Mount the local server code into the container
+      - ./server:/usr/src/app
+      # Use a volume for node_modules to avoid overwriting it with the local folder
+      - /usr/src/app/node_modules
+
+  client:
+    # Override the production build with our development Dockerfile
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      # Expose the Vite dev server port to the host
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules

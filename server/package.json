@@ -21,7 +21,9 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
     "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.3",
+    "nodemailer": "^6.9.14",
+    "otp-generator": "^4.0.1"
   },
   "devDependencies": {
     "jest": "^30.3.0",
