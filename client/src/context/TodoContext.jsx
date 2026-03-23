@@ -14,6 +14,11 @@ export const TodoProvider = ({ children }) => {
   const { token } = useContext(AuthContext);
   const socketRef = useRef(null);
 
+  // Refs for notification logic
+  const todosRef = useRef(todos);
+  const notifiedMinuteRef = useRef(-1);
+  const notifiedTodosRef = useRef(new Set());
+
   const getTodos = useCallback(async () => {
     if (!token) return;
     try {
@@ -30,6 +35,56 @@ export const TodoProvider = ({ children }) => {
 
   useEffect(() => {
     getTodos();
+  }, [getTodos]);
+
+  // Keep the todosRef in sync with the todos state for the notification interval
+  useEffect(() => {
+    todosRef.current = todos;
+  }, [todos]);
+
+  // Effect for requesting notification permission on component mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Effect for checking todos and sending notifications
+  useEffect(() => {
+    const checkTodosForNotification = () => {
+      if (Notification.permission !== 'granted') {
+        return;
+      }
+
+      const now = new Date();
+      const currentMinute = now.getMinutes();
+
+      // Reset the set of notified todos every new minute to avoid duplicate notifications for the same task
+      if (currentMinute !== notifiedMinuteRef.current) {
+        notifiedTodosRef.current.clear();
+        notifiedMinuteRef.current = currentMinute;
+      }
+
+      const currentTime = now.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      todosRef.current.forEach((todo) => {
+        if (todo.time === currentTime && !todo.completed && !notifiedTodosRef.current.has(todo._id)) {
+          new Notification('Todo App: Task Due!', {
+            body: `Your task "${todo.task}" is due now.`,
+            icon: '/vite.svg', // Ensure this icon is in your `public` folder
+          });
+          notifiedTodosRef.current.add(todo._id);
+        }
+      });
+    };
+
+    const intervalId = setInterval(checkTodosForNotification, 30000); // Check every 30 seconds
+
+    // Cleanup on component unmount
+    return () => clearInterval(intervalId);
   }, [getTodos]);
 
   useEffect(() => {
