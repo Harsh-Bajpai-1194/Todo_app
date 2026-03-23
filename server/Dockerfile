@@ -7,8 +7,11 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-# Use 'npm ci' for faster, more reliable builds in production and omit dev dependencies
+
+# Set the official npm registry to work around potential CDN/network issues
+RUN npm config set registry https://registry.npmjs.org/
+
+# Install all dependencies, including devDependencies for nodemon.
 RUN npm install
 
 # Copy the rest of the application code
