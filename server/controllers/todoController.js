@@ -1,4 +1,5 @@
 const Todo = require('../models/Todo');
+const mongoose = require('mongoose');
 
 // @desc     Get all user's todos
 exports.getTodos = async (req, res) => {
@@ -83,7 +84,7 @@ exports.getTodoStats = async (req, res) => {
             // Filter for the user's todos that were completed in the last 7 days
             {
                 $match: {
-                    user: req.user.id,
+                    user: new mongoose.Types.ObjectId(req.user.id),
                     completed: true,
                     updatedAt: { $gte: sevenDaysAgo }
                 }
