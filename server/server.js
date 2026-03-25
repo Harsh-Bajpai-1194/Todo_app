@@ -7,54 +7,48 @@ const socketAuth = require('./socketAuth');
 
 const app = express();
 const server = http.createServer(app);
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://your-todo-app.vercel.app'],
-  credentials: true
-}));
+
 // Load Env Vars
 require('dotenv').config({ path: './.env' });
 
-// Check for required environment variables for email functionality
+// 1. Consolidated CORS Setup
+const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+app.use(cors({
+  origin: clientUrl,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"]
+}));
+
+// 2. Fatal Error Check for Email Functionality
 if (!process.env.EMAIL_USERNAME || !process.env.EMAIL_PASSWORD) {
-  console.error('\x1b[31m%s\x1b[0m', 'FATAL ERROR: EMAIL_USERNAME and EMAIL_PASSWORD must be defined in your .env file for OTP emails to work.');
-  console.error('Please ensure a .env file exists in the /server directory with these values.');
+  console.error('\x1b[31m%s\x1b[0m', 'FATAL ERROR: EMAIL_USERNAME and EMAIL_PASSWORD must be defined.');
   process.exit(1);
 }
 
-// Middleware for parsing JSON and urlencoded form data
-// It's important to have these before the routes.
+// 3. Essential Middleware (Must be before routes)
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// 4. Socket.io Configuration
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: clientUrl,
     methods: ["GET", "POST"]
   }
 });
 
-// Socket.io authentication middleware
 io.use(socketAuth);
+app.set('socketio', io);
 
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-}));
-
+// 5. Define Routes
 app.get('/', (req, res) => res.json({ msg: 'Welcome to the Todo API...' }));
-
-// Define Routes
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/todos', require('./routes/todos'));
 
-// Make io accessible to our router by setting it on the app
-app.set('socketio', io);
-
-// Handle socket connections
+// 6. Handle socket connections
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id} (User ID: ${socket.user.id})`);
-  // Join a room specific to the user ID. This ensures data privacy.
   socket.join(socket.user.id);
 
   socket.on('disconnect', () => {
@@ -63,14 +57,15 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
 
+// 7. Fixed Start Logic (Using 'server.listen' only)
 const startServer = async () => {
   try {
     await connectDB();
-    server.listen(PORT, () => console.log(`Server started on port ${PORT}\nAPI is running at http://localhost:${PORT}`));
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server started on port ${PORT}`);
+      console.log(`API is running at http://localhost:${PORT}`);
+    });
   } catch (error) {
     console.error('Failed to start server due to database connection error:', error.message);
     process.exit(1);
@@ -78,14 +73,10 @@ const startServer = async () => {
 };
 
 server.on('error', (error) => {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  // handle specific listen errors with friendly messages
+  if (error.syscall !== 'listen') throw error;
   switch (error.code) {
     case 'EADDRINUSE':
-      console.error(`Error: Port ${PORT} is already in use. Is another server instance running?`);
+      console.error(`Error: Port ${PORT} is already in use.`);
       process.exit(1);
       break;
     default:
@@ -93,10 +84,8 @@ server.on('error', (error) => {
   }
 });
 
-// Only start the server if this file is run directly (not when imported for tests)
 if (require.main === module) {
   startServer();
 }
 
-// Export the server for testing purposes
 module.exports = server;

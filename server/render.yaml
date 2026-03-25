@@ -12,3 +12,15 @@ services:
         sync: false # You will enter this manually in the dashboard for security
       - key: JWT_SECRET
         generateValue: true # Render will create a secure 256-bit key for you
+# ... (existing config)
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: EMAIL_USERNAME
+        sync: false # Manually add in Render Dashboard
+      - key: EMAIL_PASSWORD
+        sync: false # Manually add in Render Dashboard
+      - key: CLIENT_URL
+        value: https://your-todo-frontend.vercel.app
