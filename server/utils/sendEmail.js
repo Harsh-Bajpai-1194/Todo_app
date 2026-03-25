@@ -5,15 +5,15 @@ const sendEmail = async (options) => {
   // For Gmail, you'll need to generate an "App Password" if you have 2FA enabled.
   // See: https://support.google.com/accounts/answer/185833
 const transporter = nodemailer.createTransport({
-host: 'smtp.gmail.com',
-port: 465,       // Change 587 to 465
-secure: true,    // Change false to true for port 465
-auth: {
-  user: process.env.EMAIL_USER,
-  pass: process.env.EMAIL_PASS, // Your 16-character App Password
-},
-tls: {
-    rejectUnauthorized: false // Helps bypass network-level certificate issues
+  host: 'smtp.gmail.com',
+  port: 465,       // Use 465 instead of 587 for better reliability on Render
+  secure: true,    // Required for port 465
+  auth: {
+    user: process.env.EMAIL_USERNAME,
+    pass: process.env.EMAIL_PASSWORD, // Ensure this is your 16-character App Password
+  },
+  tls: {
+    rejectUnauthorized: false // Helps bypass security blocks on cloud servers
   }
 });
 
