@@ -1,17 +1,19 @@
 const express = require('express');
-const connectDB = require('./config/db');
-const cors = require('cors');
 const http = require('http');
 const { Server } = require("socket.io");
+const cors = require('cors');
+const connectDB = require('./config/db');
 const socketAuth = require('./socketAuth');
 
+// Initialize App and HTTP Server
 const app = express();
 const server = http.createServer(app);
 
-// Load Env Vars
+// Load Environment Variables
 require('dotenv').config({ path: './.env' });
 
-// 1. Consolidated CORS (Use CLIENT_URL env var)
+// 1. Consolidated CORS Setup
+// In production, Render needs to know where your Vercel frontend is.
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 app.use(cors({
   origin: clientUrl,
@@ -19,15 +21,17 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"]
 }));
 
-// 2. Fatal Error Check for OTP Functionality
+// 2. Fatal Error Check for Email (Required for your OTP logic)
 if (!process.env.EMAIL_USERNAME || !process.env.EMAIL_PASSWORD) {
-  console.error('FATAL ERROR: EMAIL_USERNAME and EMAIL_PASSWORD must be defined.');
+  console.error('\x1b[31m%s\x1b[0m', 'FATAL ERROR: EMAIL_USERNAME and EMAIL_PASSWORD are not defined.');
   process.exit(1);
 }
 
+// 3. Standard Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// 4. Socket.io Configuration (Sharing the same HTTP server)
 const io = new Server(server, {
   cors: {
     origin: clientUrl,
@@ -38,17 +42,28 @@ const io = new Server(server, {
 io.use(socketAuth);
 app.set('socketio', io);
 
-// ... (Routes and socket logic remain the same)
+// 5. Routes
+app.get('/', (req, res) => res.json({ status: "API is working", timestamp: new Date() }));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/todos', require('./routes/todos'));
 
+// 6. Socket logic
+io.on('connection', (socket) => {
+  console.log(`Connected: ${socket.id} (User: ${socket.user.id})`);
+  socket.join(socket.user.id);
+  socket.on('disconnect', () => console.log(`Disconnected: ${socket.id}`));
+});
+
+// 7. Dynamic Port Binding for Render
 const PORT = process.env.PORT || 5000;
 
-// 3. FIXED: Single entry point using 'server'
 const startServer = async () => {
   try {
     await connectDB();
-    // Render needs '0.0.0.0' to bind correctly
+    // CRITICAL: Bind to 0.0.0.0 so Render can route traffic to it
     server.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server started on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error('Database connection failed:', error.message);
