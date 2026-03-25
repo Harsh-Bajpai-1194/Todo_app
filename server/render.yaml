@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: todo-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false # You will enter this manually in the dashboard for security
+      - key: JWT_SECRET
+        generateValue: true # Render will create a secure 256-bit key for you

@@ -7,7 +7,10 @@ const socketAuth = require('./socketAuth');
 
 const app = express();
 const server = http.createServer(app);
-
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://your-todo-app.vercel.app'],
+  credentials: true
+}));
 // Load Env Vars
 require('dotenv').config({ path: './.env' });
 
@@ -60,6 +63,9 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 const startServer = async () => {
   try {
