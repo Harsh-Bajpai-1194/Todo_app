@@ -1,6 +1,6 @@
 # Todo App
 
-This is a full-stack Todo application featuring a Node.js backend with Express and MongoDB.
+This is a full-stack Todo application featuring Node.js backend with Express and MongoDB.
 
 ## Project Structure
 
