@@ -101,7 +101,7 @@ FAANG companies value engineers who understand the full software development lif
 - [x] **Unit & Integration Testing**: Write tests using Jest and React Testing Library to ensure your components and API endpoints work as expected.
  - [x] **CI/CD Pipeline**: Set up GitHub Actions to automatically run tests whenever you push code.
  - [x] **Containerization**: Use Docker to containerize the frontend, backend, and database for consistent environments.
-- [ ] **Deployment**: Deploy the backend on AWS (EC2 or Lambda) or Render, and the frontend on Vercel or Netlify.
+- [ ] **Deployment**: Deploy the backend on AWS (EC2 or Lambda) or Render, and the frontend on Vercel/Netlify.
 
 ## Resume Impact Strategy
 
