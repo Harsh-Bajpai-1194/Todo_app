@@ -15,6 +15,7 @@ const sendEmail = async (options) => {
       user: process.env.EMAIL_USERNAME, // Must be set in Render Environment
       pass: process.env.EMAIL_PASSWORD, // Must be the 16-character App Password
     },
+    family: 4,                  // <--- THE FIX: Forces IPv4 to prevent Render connection timeouts
     connectionTimeout: 10000,   // 10 seconds timeout to prevent hanging requests
     greetingTimeout: 5000,
     socketTimeout: 15000,
