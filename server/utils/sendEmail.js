@@ -9,8 +9,9 @@ const sendEmail = async (options) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',           // Explicitly define the service
     host: 'smtp.gmail.com',
-    port: 465,                  // Port 465 is more stable than 587 on Render
-    secure: true,               // Required for port 465
+    port: 587,            
+    secure: false,           
+    requireTLS: true,            
     auth: {
       user: process.env.EMAIL_USERNAME, // Must be set in Render Environment
       pass: process.env.EMAIL_PASSWORD, // Must be the 16-character App Password
