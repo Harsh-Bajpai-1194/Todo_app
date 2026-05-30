@@ -1,3 +1,4 @@
+
 services:
   mongo:
     image: mongo:4.4
@@ -10,7 +11,7 @@ services:
     build: ./server
     container_name: todo-server
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - MONGO_URI=mongodb://mongo:27017/todo-app
       - JWT_SECRET=your_jwt_secret_for_docker
@@ -20,12 +21,11 @@ services:
     depends_on:
       - mongo
     restart: unless-stopped
-
   client:
     build: ./client
     container_name: todo-client
     ports:
-      - "8080:80"
+      - "8080:80" 
     depends_on:
       - server
     restart: unless-stopped
