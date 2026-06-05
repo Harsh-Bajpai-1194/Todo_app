@@ -2,6 +2,7 @@
 
 This is a full-stack Todo application featuring Node.js backend with Express and MongoDB.
 
+
 ## Project Structure
 
 - **server/**: Contains the backend code.
@@ -88,6 +89,7 @@ A professional project requires a robust backend instead of relying solely on lo
   - [x] **Drag-and-Drop**: Use `@hello-pangea/dnd` to allow users to reorder tasks.
   - [x] **Filtering & Sorting**: Allow users to view "Completed," "Pending," or tasks sorted by time.
   - [x] **Search Functionality**: A real-time search bar to find specific tasks.
+
 
 ### Phase 3: Advanced "FAANG-Ready" Features
 To stand out, incorporate complex engineering challenges:
