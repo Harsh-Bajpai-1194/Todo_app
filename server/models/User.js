@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -20,10 +19,12 @@ const UserSchema = new mongoose.Schema({
   },
   otp: {
     type: String,
+    required: false
   },
   otpExpires: {
     type: Date,
-  },
+    required: false
+  }
 });
 
 module.exports = mongoose.model('user', UserSchema);
