@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
-import axios from '../api';
+import axios from '../api.js';
 import { AuthContext } from './AuthContext';
 
 export const TodoContext = createContext();
