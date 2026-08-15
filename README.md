@@ -107,4 +107,4 @@ FAANG companies value engineers who understand the full software development lif
 
 ## Resume Impact Strategy
 When listing this on your resume, focus on the technical challenges solved:
-> "Developed a full-stack MERN task management system supporting 100+ concurrent users; implemented JWT-based authentication and optimized MongoDB queries, reducing API latency by 30%. Integrated Socket.io for real-time state synchronization and achieved 90%+ test coverage using Jest."
+> "Developed a full-stack MERN task management system supporting 100+ concurrent users; implemented JWT-based authentication and optimized MongoDB queries, reducing API latency by 30%. Integrated Socket.io for real-time state synchronization and achieved 90%+ test coverage using Jest." 
